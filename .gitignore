@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.pkl
+*_out.json
+*.log
+.venv/
