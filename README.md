@@ -116,13 +116,42 @@ Ten cards whose ground truth comes from validated paradigms instead of author as
 | 3.4 H⊥ / ablation | Precondition **holds**; ablation **insufficient** — contamination is structural, not a direction. Decontaminate by moving the mapping into code. |
 | 3.5 steering-distillation | Untested; now lower priority than the structural route. |
 
+### 4.7 Second round (July 2026): the time-stop clause, A/B-tested
+The Staw-type "premise charity" failure (§4.5) suggested a fix: extend the thesis-death definition with a **time-stop** — *past its expected realization window/level with no sign of realization and continued adverse drift = treat as dead even without formal disconfirmation*, guarded by *"but never kill a thesis that has no deadline by nature, or one whose objective signs of realization continue."* On 8 fresh cards (4 time-stop targets / 4 look-alike controls, judge-swap only, shared panels): targets **1/4 → 3/4**, controls **4/4 → 4/4 (zero false fires)**. The guard clause carried the specificity. Promoted to default in our production verdict chain. Remaining resistant case: *indefinitely-postponed* catalysts ("no withdrawal announcement exists") — see 4.8 for how that fell.
+
+### 4.8 Independent-author blind deck: two "architecture limits" dissolve into information design
+To break the same-author loop (clause author = card author), we commissioned a 20-card deck from an **unrelated LLM (ChatGPT), with a written spec** (`experiments/card_request.md`: category quotas, no lookahead, no leading words, no statistical leakage, no textbook copy-paste, answers in a separately-sealed key). The frozen pipeline (prompts byte-identical to the pre-registered runs) scored **18/20, exit recall 9/10, zero false exits on healthy holds; the risk-manageability route fired on exactly the 2 weekend-gap cards and nowhere else.**
+
+Two previously-diagnosed "architecture limits" turned out to be **information-design problems**:
+- **Consumed-thesis cases (0/6 on our own deck) went 3/3** — because the independent cards state the thesis's current health and the residual value explicitly, the judge correctly answers "alive" and the downstream binary lands on *reduce*. Our own cards had framed consumption ambiguously as death.
+- **Indefinite-postponement entrapment (0/2 previously) went 3/3** — with the postponement *count* and cumulative carry *cost* written as numbers, the judge declares death without any clause. The earlier failures sat below an information threshold (2 postponements vs 4–6).
+
+Design consequence: **pre-digest the context** (thesis status / residual value / postponement count / cumulative cost as separate fields) rather than hoping the judge extracts them from prose. Caveats: the external author may itself draw on common templates (training-data overlap with the tested model is possible), so we treat absolute scores cautiously; the ON/OFF *differentials* are within-card comparisons and robust to that.
+
+### 4.9 The fourth verdict: escalation (expert-signed)
+Arbitrating the two disagreements, the domain expert signed one exit — and for the genuinely boundary case refused the menu: *"contact the human to confirm; if unreachable, lean exit."* That adds a **fourth output to the architecture: escalation** — analogous to a pharmacist's 疑義照会 (query-back on an ambiguous prescription: don't dispense until the prescriber confirms; fail safe if unreachable). Where the rounding disease *pretends* to decide by picking the middle, escalation reports the boundary honestly. Boundary detectors are already available in the pipeline (panel-vs-verdict disagreement, hedging density of the final binary, the decisive-projection warning light of §4.4's probe).
+
+### 4.10 Judge-model bake-off: structure is externalized thinking
+With the deck contexts frozen, we swapped only the verdict chain across judges (same prompts, greedy):
+
+| judge | acc | exit recall | false exits on holds | failure mode |
+|---|---|---|---|---|
+| steered 14B (reference) | 18/20 | 9/10 | 0/5 | — |
+| **same 14B, prompt-only** | **18/20** | 9/10 | 0/5 | **identical errors to steered** |
+| same-family 14B w/ thinking | 17/20 | 8/10 | 0/5 | solved the hardest card, then *thought itself back into hedging* on two others |
+| 20B open reasoning model (fair token budget) | 15/20 | 9/10 | **3/5** | the **paranoid pole**: kills healthy positions |
+| R1-distilled 14B (same base + reasoning) | 10/20 | 7/10 | 2/5 | the middle option collapses (reduce: 0/5) |
+
+Readings: (1) **activation steering contributed nothing to the verdict chain** — prompt-only reproduced the steered judge error-for-error, so the structural decomposition carries the whole effect (good news: it ports to any inference API). (2) **More "working memory" (reasoning/thinking) did not make a better judge** — it made differently-diseased judges: hedging regression, paranoia, or middle-collapse. The factual-binary + code-mapping pipeline already *is* the externalized chain of thought, with the verdict mapping protected from the model's priors; giving the model a private scratchpad mostly re-opens the door to those priors. (3) Practical trap: thinking tokens count against the output budget — at standard budgets the reasoning model's *label was truncated away* while its reasoning was right (11/20 → 15/20 after a 4× budget; same failure class as §4.3's truncation). Caveats: prompts were co-developed with the qwen family (home advantage), R1-distills discourage system prompts, N=20.
+
 ## 5. Reproduce
 
 - `experiments/committee_lab*.py` — status-framing / conformity probes (flat vs status second round; embedding-diversity + skeptic-divergence metrics).
 - `experiments/committee_exp.py` — the ideation-status experiment with a double-trap case and ground-truth scoring.
 - `experiments/extract_*.py`, `sweep_strength.py` — RepE control-vector extraction (via [`repeng`](https://github.com/vgel/repeng)) and strength/layer sweeps; `extract_axes.py` (orthogonal persona basis), `extract_vval.py` (v_val + the H⊥ angle table + validity probe).
 - **§4 pipeline**: `decide.py` (negation-aware verdict parser) · `committee_v5_structural.py` (structural decomposition, 4/4) · `committee_v4_ablation.py` (the ablation negative result / "double bottom") · `committee_c20.py` (N=20 controlled run) · `committee_cprime*.py` (the sub-classification protocol catalog, incl. both collapse directions) · `committee_q2prime.py` (third route: risk-manageability binary) · `committee_gtest.py` (literature deck end-to-end).
-- **Card decks**: `committee_cases.py` (20 semi-synthetic dev), `cases_holdout.py` (10 holdout, expert-signed), `cases_gtheory.py` (10 literature-anchored). All fictional scenarios; calibration figures redacted.
+- **Card decks**: `committee_cases.py` (20 semi-synthetic dev), `cases_holdout.py` (10 holdout, expert-signed), `cases_gtheory.py` (10 literature-anchored), `cases_timestop.py` (8 time-stop A/B), `cases_x_blind.py` + `answers_x.py` (20 independent-author blind deck + sealed key + expert arbitration). All fictional scenarios; calibration figures redacted.
+- **Second round (§4.7–4.10)**: `committee_tstop.py` (time-stop A/B) · `committee_xblind.py` (frozen blind run) · `judge_compare.py` (judge-model bake-off over frozen contexts, via any Ollama endpoint) · `card_request.md` (the commissioning spec for independent-author decks — reusable).
 
 Stack: `transformers` + `repeng` for steering; `Ollama` + `bge-m3` for the committee/embedding probes. Run counts are small; **raise N substantially before drawing conclusions.**
 
